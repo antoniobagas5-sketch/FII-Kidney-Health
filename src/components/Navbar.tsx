@@ -1,28 +1,35 @@
 import React, { useState } from 'react';
 import { ArrowRight, Menu, X } from 'lucide-react';
-import { ConsultationCategory, NavSectionId } from '../types';
+import { getTranslations } from '../i18n/translations';
+import { ConsultationCategory, Language, NavSectionId } from '../types';
 import { BrandLogo } from './BrandLogo';
+import { LanguageToggle } from './LanguageToggle';
 
 interface NavbarProps {
+  language: Language;
+  onLanguageChange: (lang: Language) => void;
   activeSection: NavSectionId;
   onNavigate: (section: NavSectionId) => void;
   onConsultKso: (category: ConsultationCategory) => void;
 }
 
-const NAV_ITEMS: { id: NavSectionId; label: string }[] = [
-  { id: 'home', label: 'Home' },
-  { id: 'services', label: 'Services' },
-  { id: 'portofolio', label: 'Portofolio' },
-  { id: 'about', label: 'About' },
-  { id: 'contact', label: 'Contact' },
+const NAV_IDS: NavSectionId[] = [
+  'home',
+  'services',
+  'portofolio',
+  'about',
+  'contact',
 ];
 
 export const Navbar: React.FC<NavbarProps> = ({
+  language,
+  onLanguageChange,
   activeSection,
   onNavigate,
   onConsultKso,
 }) => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const t = getTranslations(language).nav;
 
   const handleLinkClick = (section: NavSectionId) => {
     setMobileMenuOpen(false);
@@ -45,25 +52,25 @@ export const Navbar: React.FC<NavbarProps> = ({
             handleLinkClick('home');
           }}
           className="focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1D63B8] rounded-md shrink-0"
-          aria-label="Beranda FII Kidney Health"
+          aria-label={t.homeAria}
         >
           <BrandLogo variant="header" tone="dark" />
         </a>
 
         {/* Zone 2: Desktop Navigation Links */}
         <nav
-          aria-label="Navigasi utama"
+          aria-label={t.navAria}
           className="hidden md:flex items-center gap-7"
         >
-          {NAV_ITEMS.map((item) => {
-            const isActive = activeSection === item.id;
+          {NAV_IDS.map((id) => {
+            const isActive = activeSection === id;
             return (
               <a
-                key={item.id}
-                href={`#${item.id}`}
+                key={id}
+                href={`#${id}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  handleLinkClick(item.id);
+                  handleLinkClick(id);
                 }}
                 aria-current={isActive ? 'page' : undefined}
                 className={`relative py-1.5 text-sm font-medium whitespace-nowrap shrink-0 transition-colors duration-150 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1D63B8] ${
@@ -72,7 +79,7 @@ export const Navbar: React.FC<NavbarProps> = ({
                     : 'text-[#475569] hover:text-[#0B2C5F]'
                 }`}
               >
-                {item.label}
+                {t.items[id]}
                 <span
                   aria-hidden="true"
                   className={`absolute inset-x-0 -bottom-0.5 h-0.5 rounded-full bg-[#1D63B8] transition-all duration-200 ${
@@ -91,7 +98,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             onClick={handleKsoClick}
             className="hidden sm:inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0B2C5F] text-white text-sm font-semibold hover:bg-[#1D63B8] transition-colors duration-150 whitespace-nowrap shrink-0 shadow-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B2C5F]"
           >
-            <span>Konsultasi KSO</span>
+            <span>{t.cta}</span>
             <ArrowRight className="w-4 h-4" />
           </button>
 
@@ -99,7 +106,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             type="button"
             onClick={() => setMobileMenuOpen((prev) => !prev)}
             aria-expanded={mobileMenuOpen}
-            aria-label={mobileMenuOpen ? 'Tutup menu navigasi' : 'Buka menu navigasi'}
+            aria-label={mobileMenuOpen ? t.closeMenu : t.openMenu}
             className="md:hidden w-11 h-11 rounded-xl border border-slate-200 flex items-center justify-center text-[#0B2C5F] hover:bg-[#F8FAFC] transition-colors"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
@@ -110,15 +117,15 @@ export const Navbar: React.FC<NavbarProps> = ({
       {/* Responsive Mobile Navigation Drawer */}
       {mobileMenuOpen && (
         <div className="md:hidden border-t border-slate-200 bg-white px-4 py-4 space-y-1 shadow-lg">
-          {NAV_ITEMS.map((item) => {
-            const isActive = activeSection === item.id;
+          {NAV_IDS.map((id) => {
+            const isActive = activeSection === id;
             return (
               <a
-                key={item.id}
-                href={`#${item.id}`}
+                key={id}
+                href={`#${id}`}
                 onClick={(e) => {
                   e.preventDefault();
-                  handleLinkClick(item.id);
+                  handleLinkClick(id);
                 }}
                 className={`flex items-center justify-between px-4 py-3 rounded-xl text-sm font-medium transition-colors ${
                   isActive
@@ -126,20 +133,34 @@ export const Navbar: React.FC<NavbarProps> = ({
                     : 'text-[#475569] hover:bg-[#F8FAFC] hover:text-[#0B2C5F]'
                 }`}
               >
-                <span>{item.label}</span>
+                <span>{t.items[id]}</span>
                 {isActive && (
-                  <span className="text-xs font-semibold text-[#1D63B8]">Aktif</span>
+                  <span className="text-xs font-semibold text-[#1D63B8]">
+                    {t.activeLabel}
+                  </span>
                 )}
               </a>
             );
           })}
+
+          <div className="flex items-center justify-between px-4 py-2.5 border-t border-slate-100 mt-2">
+            <span className="text-xs font-semibold text-[#475569]">
+              {t.languageLabel}
+            </span>
+            <LanguageToggle
+              language={language}
+              onChange={onLanguageChange}
+              variant="light"
+            />
+          </div>
+
           <div className="pt-2">
             <button
               type="button"
               onClick={handleKsoClick}
               className="w-full flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-[#0B2C5F] text-white text-sm font-semibold hover:bg-[#1D63B8] transition-colors"
             >
-              <span>Konsultasi KSO</span>
+              <span>{t.cta}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

@@ -10,9 +10,11 @@ import {
   Wrench,
 } from 'lucide-react';
 import { KSO_OBLIGATIONS, SERVICES_LIST } from '../data/companyData';
-import { ConsultationCategory, ServiceItem } from '../types';
+import { getTranslations } from '../i18n/translations';
+import { ConsultationCategory, Language, ServiceItem } from '../types';
 
 interface ServicesSectionProps {
+  language: Language;
   onConsultKso: (category: ConsultationCategory) => void;
 }
 
@@ -23,22 +25,28 @@ const ICON_MAP: Record<ServiceItem['iconName'], React.ReactNode> = {
   GraduationCap: <GraduationCap className="w-6 h-6" />,
 };
 
-export const ServicesSection: React.FC<ServicesSectionProps> = ({ onConsultKso }) => {
+export const ServicesSection: React.FC<ServicesSectionProps> = ({
+  language,
+  onConsultKso,
+}) => {
+  const t = getTranslations(language).services;
+
   return (
-    <section id="services" className="py-20 lg:py-24 bg-[#F8FAFC] border-t border-slate-200/70">
+    <section
+      id="services"
+      className="py-20 lg:py-24 bg-[#F8FAFC] border-t border-slate-200/70"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="max-w-2xl">
           <p className="text-xs sm:text-sm font-semibold tracking-wider text-[#1D63B8] mb-3">
-            RUANG LINGKUP LAYANAN
+            {t.eyebrow}
           </p>
           <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-[#0F172A] text-balance">
-            Solusi Medis Komprehensif untuk Rumah Sakit
+            {t.title}
           </h2>
           <p className="mt-4 text-base text-[#475569] leading-relaxed">
-            Kami menyediakan layanan terintegrasi mulai dari skema kemitraan KSO mesin
-            haemodialisa, pengadaan alat kesehatan, pemeliharaan berkala, hingga
-            peningkatan kompetensi tenaga klinis.
+            {t.subtitle}
           </p>
         </div>
 
@@ -60,19 +68,19 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onConsultKso }
                 </div>
 
                 <h3 className="font-display text-xl font-bold text-[#0F172A] leading-snug">
-                  {service.title}
+                  {service.title[language]}
                 </h3>
 
                 <p className="mt-3 text-sm sm:text-base text-[#475569] leading-relaxed">
-                  {service.description}
+                  {service.description[language]}
                 </p>
               </div>
 
               <div className="mt-6 pt-5 border-t border-slate-100 flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs sm:text-sm font-medium text-[#0B2C5F]">
-                {service.highlights.map((item, idx) => (
+                {service.highlights[language].map((item, idx) => (
                   <React.Fragment key={item}>
                     <span>{item}</span>
-                    {idx < service.highlights.length - 1 && (
+                    {idx < service.highlights[language].length - 1 && (
                       <span aria-hidden="true" className="text-slate-300">
                         ·
                       </span>
@@ -88,17 +96,17 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onConsultKso }
         <div className="mt-16 bg-white rounded-2xl border border-slate-200/90 p-6 sm:p-10 lg:p-12 shadow-xs">
           <div className="max-w-3xl">
             <p className="text-xs sm:text-sm font-semibold tracking-wider text-[#1D63B8] mb-2">
-              TRANSPARANSI SKEMA KEMITRAAN
+              {t.ksoEyebrow}
             </p>
             <h3 className="font-display text-2xl sm:text-3xl font-bold text-[#0F172A] text-balance">
-              Model Kerja Sama Operasional (KSO) — Revenue Sharing
+              {t.ksoTitle}
             </h3>
             <p className="mt-3 text-sm sm:text-base text-[#475569] leading-relaxed">
-              PT Foremed Indo Industri menerapkan skema{' '}
-              <span className="font-semibold text-[#0B2C5F]">revenue sharing</span> dari
-              total pendapatan per tindakan medis. Model ini dirancang untuk menciptakan
-              kemitraan yang adil, efisien, dan berkelanjutan tanpa membebani arus kas
-              awal rumah sakit.
+              {t.ksoIntroBefore}{' '}
+              <span className="font-semibold text-[#0B2C5F]">
+                {t.ksoIntroHighlight}
+              </span>{' '}
+              {t.ksoIntroAfter}
             </p>
           </div>
 
@@ -111,16 +119,21 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onConsultKso }
                     <Handshake className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-blue-200">Mitra Penyedia Teknologi</p>
+                    <p className="text-xs font-medium text-blue-200">
+                      {t.fiiSubtitle}
+                    </p>
                     <h4 className="font-display text-lg sm:text-xl font-bold text-white">
-                      Kewajiban PT Foremed Indo Industri (FII)
+                      {t.fiiTitle}
                     </h4>
                   </div>
                 </div>
 
                 <ul className="space-y-3.5 mt-6">
-                  {KSO_OBLIGATIONS.fii.map((item) => (
-                    <li key={item} className="flex items-start gap-3 text-sm sm:text-base text-slate-100">
+                  {KSO_OBLIGATIONS.fii[language].map((item) => (
+                    <li
+                      key={item}
+                      className="flex items-start gap-3 text-sm sm:text-base text-slate-100"
+                    >
                       <span className="w-5 h-5 rounded-full bg-[#1D63B8] text-white flex items-center justify-center shrink-0 mt-0.5">
                         <Check className="w-3.5 h-3.5" />
                       </span>
@@ -131,7 +144,7 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onConsultKso }
               </div>
 
               <div className="mt-8 pt-5 border-t border-white/15 text-xs sm:text-sm text-blue-100">
-                Fokus FII: Kesiapan teknologi medis, kontinuitas BHP, dan reliabilitas mesin.
+                {t.fiiFoot}
               </div>
             </div>
 
@@ -143,16 +156,21 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onConsultKso }
                     <Building2 className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-xs font-medium text-[#1D63B8]">Mitra Layanan Klinis</p>
+                    <p className="text-xs font-medium text-[#1D63B8]">
+                      {t.rsSubtitle}
+                    </p>
                     <h4 className="font-display text-lg sm:text-xl font-bold text-[#0F172A]">
-                      Kewajiban Pihak Rumah Sakit
+                      {t.rsTitle}
                     </h4>
                   </div>
                 </div>
 
                 <ul className="space-y-3.5 mt-6">
-                  {KSO_OBLIGATIONS.hospital.map((item) => (
-                    <li key={item} className="flex items-start gap-3 text-sm sm:text-base text-[#0F172A]">
+                  {KSO_OBLIGATIONS.hospital[language].map((item) => (
+                    <li
+                      key={item}
+                      className="flex items-start gap-3 text-sm sm:text-base text-[#0F172A]"
+                    >
                       <span className="w-5 h-5 rounded-full bg-[#EBF3FA] text-[#1D63B8] flex items-center justify-center shrink-0 mt-0.5">
                         <Check className="w-3.5 h-3.5" />
                       </span>
@@ -163,22 +181,19 @@ export const ServicesSection: React.FC<ServicesSectionProps> = ({ onConsultKso }
               </div>
 
               <div className="mt-8 pt-5 border-t border-slate-200 text-xs sm:text-sm text-[#475569]">
-                Fokus Rumah Sakit: Pelayanan klinis pasien dan tata kelola instalasi dialisis.
+                {t.rsFoot}
               </div>
             </div>
           </div>
 
           <div className="mt-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 pt-6 border-t border-slate-100">
-            <p className="text-sm text-[#475569]">
-              Komposisi bagi hasil disesuaikan secara adaptif berdasarkan kapasitas unit dan
-              proyeksi tindakan rumah sakit Anda.
-            </p>
+            <p className="text-sm text-[#475569]">{t.ksoNote}</p>
             <button
               type="button"
               onClick={() => onConsultKso('KSO Mesin Haemodialisa')}
               className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#0B2C5F] text-white text-sm font-semibold hover:bg-[#1D63B8] transition-colors duration-150 whitespace-nowrap shrink-0 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0B2C5F]"
             >
-              <span>Ajukan Proposal &amp; Simulasi KSO</span>
+              <span>{t.ksoCta}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

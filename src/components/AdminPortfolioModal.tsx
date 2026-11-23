@@ -1,13 +1,16 @@
 import React, { useEffect, useState } from 'react';
 import { Plus, RotateCcw, Trash2, Upload, X } from 'lucide-react';
 import { LOCAL_ASSETS } from '../data/companyData';
+import { getTranslations } from '../i18n/translations';
 import {
+  Language,
   PortfolioItem,
   PortfolioMediaType,
   PortfolioProjectCategory,
 } from '../types';
 
 interface AdminPortfolioModalProps {
+  language: Language;
   isOpen: boolean;
   items: PortfolioItem[];
   onClose: () => void;
@@ -16,15 +19,16 @@ interface AdminPortfolioModalProps {
   onResetDefaults: () => void;
 }
 
-const ASSET_PRESETS = [
-  { label: 'Unit Ruang Haemodialisa', url: LOCAL_ASSETS.portfolioHdWard },
-  { label: 'Suite Dialisis & Tim Medis', url: LOCAL_ASSETS.heroDialysis },
-  { label: 'Ruang Radiologi Digital', url: LOCAL_ASSETS.portfolioRadiology },
-  { label: 'Pelatihan & Kalibrasi Biomedis', url: LOCAL_ASSETS.portfolioTraining },
-  { label: 'Sistem Water Treatment RO', url: LOCAL_ASSETS.portfolioRoSystem },
+const PRESET_URLS = [
+  LOCAL_ASSETS.portfolioHdWard,
+  LOCAL_ASSETS.heroDialysis,
+  LOCAL_ASSETS.portfolioRadiology,
+  LOCAL_ASSETS.portfolioTraining,
+  LOCAL_ASSETS.portfolioRoSystem,
 ];
 
 export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
+  language,
   isOpen,
   items,
   onClose,
@@ -32,6 +36,9 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
   onDeleteItem,
   onResetDefaults,
 }) => {
+  const tPortfolio = getTranslations(language).portfolio;
+  const t = tPortfolio.admin;
+
   const [title, setTitle] = useState('');
   const [category, setCategory] =
     useState<PortfolioProjectCategory>('KSO Haemodialisa');
@@ -64,9 +71,7 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
     if (!file) return;
 
     if (file.size > 4 * 1024 * 1024) {
-      setErrorMessage(
-        'Ukuran berkas maksimal 4 MB agar dapat disimpan di penyimpanan peramban.'
-      );
+      setErrorMessage(t.errors.maxFile);
       return;
     }
 
@@ -88,15 +93,15 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (title.trim().length < 5) {
-      setErrorMessage('Judul proyek minimal 5 karakter.');
+      setErrorMessage(t.errors.titleMin);
       return;
     }
     if (location.trim().length < 3) {
-      setErrorMessage('Nama rumah sakit dan kota lokasi wajib diisi.');
+      setErrorMessage(t.errors.locationMin);
       return;
     }
     if (description.trim().length < 15) {
-      setErrorMessage('Deskripsi teknis proyek minimal 15 karakter.');
+      setErrorMessage(t.errors.descMin);
       return;
     }
 
@@ -120,9 +125,17 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
       videoHighlights:
         mediaType === 'VIDEO' && !isUploadedVideo
           ? [
-              `00:00 — Tinjauan fasilitas ${location.trim()}`,
-              `00:15 — Uji operasional & kesiapan alat kesehatan (${category})`,
-              '00:25 — Serah terima dan verifikasi teknis oleh tim FII',
+              `00:00 — ${
+                language === 'en' ? 'Facility overview at' : 'Tinjauan fasilitas'
+              } ${location.trim()}`,
+              `00:15 — ${
+                language === 'en'
+                  ? 'Operational testing & equipment readiness'
+                  : 'Uji operasional & kesiapan alat kesehatan'
+              } (${tPortfolio.filters[category]})`,
+              language === 'en'
+                ? '00:25 — Handover & technical verification by FII team'
+                : '00:25 — Serah terima dan verifikasi teknis oleh tim FII',
             ]
           : undefined,
       isCustom: true,
@@ -158,16 +171,14 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
               id="admin-portfolio-title"
               className="font-display text-lg font-bold text-[#0B2C5F]"
             >
-              Mode Admin — Tambah Portofolio Proyek
+              {t.title}
             </h3>
-            <p className="text-xs text-[#475569]">
-              Data baru otomatis tersimpan di peramban (localStorage).
-            </p>
+            <p className="text-xs text-[#475569]">{t.subtitle}</p>
           </div>
           <button
             type="button"
             onClick={onClose}
-            aria-label="Tutup panel admin"
+            aria-label={t.closeAria}
             className="w-9 h-9 rounded-lg border border-slate-200 text-[#475569] hover:text-[#0F172A] flex items-center justify-center"
           >
             <X className="w-5 h-5" />
@@ -189,14 +200,14 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
               htmlFor="admin-proj-title"
               className="block text-sm font-semibold text-[#0F172A] mb-1.5"
             >
-              Nama Proyek *
+              {t.nameLabel}
             </label>
             <input
               id="admin-proj-title"
               type="text"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Contoh: Instalasi 10 Unit Mesin HD RS Kasih Ibu"
+              placeholder={t.namePlaceholder}
               className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-[#0F172A] focus:outline-none focus:border-[#1D63B8] focus:ring-2 focus:ring-[#1D63B8]/15"
               required
             />
@@ -208,7 +219,7 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
                 htmlFor="admin-proj-category"
                 className="block text-sm font-semibold text-[#0F172A] mb-1.5"
               >
-                Kategori Proyek *
+                {t.categoryLabel}
               </label>
               <select
                 id="admin-proj-category"
@@ -218,10 +229,14 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
                 }
                 className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-[#0F172A] bg-white focus:outline-none focus:border-[#1D63B8] focus:ring-2 focus:ring-[#1D63B8]/15"
               >
-                <option value="KSO Haemodialisa">KSO Haemodialisa</option>
-                <option value="Radiologi & Alkes">Radiologi &amp; Alkes</option>
+                <option value="KSO Haemodialisa">
+                  {tPortfolio.filters['KSO Haemodialisa']}
+                </option>
+                <option value="Radiologi & Alkes">
+                  {tPortfolio.filters['Radiologi & Alkes']}
+                </option>
                 <option value="Pelatihan & Maintenance">
-                  Pelatihan &amp; Maintenance
+                  {tPortfolio.filters['Pelatihan & Maintenance']}
                 </option>
               </select>
             </div>
@@ -231,7 +246,7 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
                 htmlFor="admin-proj-media"
                 className="block text-sm font-semibold text-[#0F172A] mb-1.5"
               >
-                Tipe Media *
+                {t.mediaTypeLabel}
               </label>
               <select
                 id="admin-proj-media"
@@ -241,8 +256,8 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
                 }
                 className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-[#0F172A] bg-white focus:outline-none focus:border-[#1D63B8] focus:ring-2 focus:ring-[#1D63B8]/15"
               >
-                <option value="IMAGE">Foto (IMAGE)</option>
-                <option value="VIDEO">Video (VIDEO)</option>
+                <option value="IMAGE">{t.mediaPhotoOpt}</option>
+                <option value="VIDEO">{t.mediaVideoOpt}</option>
               </select>
             </div>
           </div>
@@ -253,14 +268,14 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
                 htmlFor="admin-proj-location"
                 className="block text-sm font-semibold text-[#0F172A] mb-1.5"
               >
-                Institusi &amp; Lokasi Rumah Sakit *
+                {t.locationLabel}
               </label>
               <input
                 id="admin-proj-location"
                 type="text"
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
-                placeholder="Contoh: RSUD Dr. Soetomo — Surabaya"
+                placeholder={t.locationPlaceholder}
                 className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-[#0F172A] focus:outline-none focus:border-[#1D63B8] focus:ring-2 focus:ring-[#1D63B8]/15"
                 required
               />
@@ -271,7 +286,7 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
                 htmlFor="admin-proj-year"
                 className="block text-sm font-semibold text-[#0F172A] mb-1.5"
               >
-                Tahun *
+                {t.yearLabel}
               </label>
               <input
                 id="admin-proj-year"
@@ -291,7 +306,7 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
                 htmlFor="admin-proj-preset"
                 className="block text-sm font-semibold text-[#0F172A] mb-1.5"
               >
-                Pilih Aset Visual Lokal
+                {t.presetLabel}
               </label>
               <select
                 id="admin-proj-preset"
@@ -299,9 +314,9 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
                 onChange={(e) => setPresetUrl(e.target.value)}
                 className="w-full rounded-xl border border-slate-300 px-3.5 py-2.5 text-sm text-[#0F172A] bg-white focus:outline-none focus:border-[#1D63B8]"
               >
-                {ASSET_PRESETS.map((preset) => (
-                  <option key={preset.label} value={preset.url}>
-                    {preset.label}
+                {PRESET_URLS.map((url, idx) => (
+                  <option key={url} value={url}>
+                    {t.presets[idx]}
                   </option>
                 ))}
               </select>
@@ -312,16 +327,14 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
                 htmlFor="admin-proj-upload"
                 className="block text-sm font-semibold text-[#0F172A] mb-1.5"
               >
-                Atau Unggah Foto / Video (Opsional)
+                {t.uploadLabel}
               </label>
               <label
                 htmlFor="admin-proj-upload"
                 className="flex items-center justify-center gap-2 w-full rounded-xl border border-dashed border-slate-300 bg-[#F8FAFC] hover:border-[#1D63B8] px-4 py-2.5 text-xs font-medium text-[#0B2C5F] cursor-pointer transition-colors"
               >
                 <Upload className="w-4 h-4 text-[#1D63B8]" />
-                <span>
-                  {uploadedPreviewUrl ? 'Berkas siap diunggah' : 'Pilih Berkas Lokal'}
-                </span>
+                <span>{uploadedPreviewUrl ? t.uploadReady : t.uploadPick}</span>
                 <input
                   id="admin-proj-upload"
                   type="file"
@@ -338,14 +351,14 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
               htmlFor="admin-proj-desc"
               className="block text-sm font-semibold text-[#0F172A] mb-1.5"
             >
-              Deskripsi Teknis Proyek *
+              {t.descLabel}
             </label>
             <textarea
               id="admin-proj-desc"
               rows={3}
               value={description}
               onChange={(e) => setDescription(e.target.value)}
-              placeholder="Jelaskan lingkup instalasi, jumlah unit, skema KSO, dan hasil operasionalnya..."
+              placeholder={t.descPlaceholder}
               className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-[#0F172A] focus:outline-none focus:border-[#1D63B8] focus:ring-2 focus:ring-[#1D63B8]/15"
               required
             />
@@ -356,14 +369,14 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
               htmlFor="admin-proj-specs"
               className="block text-sm font-semibold text-[#0F172A] mb-1.5"
             >
-              Poin Spesifikasi (pisahkan dengan koma)
+              {t.specsLabel}
             </label>
             <input
               id="admin-proj-specs"
               type="text"
               value={specsInput}
               onChange={(e) => setSpecsInput(e.target.value)}
-              placeholder="Contoh: 10 Unit Mesin HD, Sistem RO, Pelatihan Perawat"
+              placeholder={t.specsPlaceholder}
               className="w-full rounded-xl border border-slate-300 px-4 py-2.5 text-sm text-[#0F172A] focus:outline-none focus:border-[#1D63B8] focus:ring-2 focus:ring-[#1D63B8]/15"
             />
           </div>
@@ -374,14 +387,14 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
               onClick={onClose}
               className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-[#475569] hover:bg-slate-50"
             >
-              Batal
+              {t.cancelBtn}
             </button>
             <button
               type="submit"
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0B2C5F] text-white text-sm font-semibold hover:bg-[#1D63B8] transition-colors"
             >
               <Plus className="w-4 h-4" />
-              <span>Simpan ke Portofolio</span>
+              <span>{t.saveBtn}</span>
             </button>
           </div>
         </form>
@@ -390,7 +403,7 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
         <div className="border-t border-slate-200 bg-[#F8FAFC] px-6 py-4 space-y-3">
           <div className="flex items-center justify-between gap-4">
             <p className="text-xs font-semibold text-[#0B2C5F]">
-              Proyek Tambahan Anda ({customItems.length})
+              {t.customListTitle(customItems.length)}
             </p>
             <button
               type="button"
@@ -398,7 +411,7 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
               className="inline-flex items-center gap-1.5 text-xs font-medium text-[#475569] hover:text-[#0B2C5F]"
             >
               <RotateCcw className="w-3.5 h-3.5" />
-              <span>Reset ke Data Bawaan</span>
+              <span>{t.resetBtn}</span>
             </button>
           </div>
 
@@ -420,7 +433,7 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
                   <button
                     type="button"
                     onClick={() => onDeleteItem(item.id)}
-                    aria-label={`Hapus ${item.title}`}
+                    aria-label={t.deleteAria(item.title)}
                     className="p-1.5 rounded-lg text-red-600 hover:bg-red-50 shrink-0"
                   >
                     <Trash2 className="w-4 h-4" />
@@ -429,10 +442,7 @@ export const AdminPortfolioModal: React.FC<AdminPortfolioModalProps> = ({
               ))}
             </ul>
           ) : (
-            <p className="text-xs text-[#475569]">
-              Belum ada proyek tambahan. Proyek yang Anda tambahkan akan tampil di galeri
-              dan tersimpan otomatis.
-            </p>
+            <p className="text-xs text-[#475569]">{t.emptyCustom}</p>
           )}
         </div>
       </div>

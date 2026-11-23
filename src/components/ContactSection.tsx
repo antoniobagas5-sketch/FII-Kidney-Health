@@ -15,9 +15,11 @@ import {
   COMPANY_CONFIG,
   CONSULTATION_CATEGORIES,
 } from '../data/companyData';
-import { ConsultationCategory } from '../types';
+import { getTranslations } from '../i18n/translations';
+import { ConsultationCategory, Language } from '../types';
 
 interface ContactSectionProps {
+  language: Language;
   selectedCategory: ConsultationCategory;
   onCategoryChange: (category: ConsultationCategory) => void;
 }
@@ -34,9 +36,12 @@ interface FormValues {
 type FormErrors = Partial<Record<keyof FormValues, string>>;
 
 export const ContactSection: React.FC<ContactSectionProps> = ({
+  language,
   selectedCategory,
   onCategoryChange,
 }) => {
+  const t = getTranslations(language).contact;
+
   const [values, setValues] = useState<FormValues>({
     fullName: '',
     roleAndHospital: '',
@@ -59,26 +64,23 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
     const trimmed = value.trim();
     switch (name) {
       case 'fullName':
-        if (trimmed.length < 3) return 'Nama lengkap wajib diisi (minimal 3 karakter).';
+        if (trimmed.length < 3) return t.errors.fullName;
         return '';
       case 'roleAndHospital':
-        if (trimmed.length < 4)
-          return 'Jabatan dan nama rumah sakit/instansi wajib diisi.';
+        if (trimmed.length < 4) return t.errors.roleAndHospital;
         return '';
       case 'email': {
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        if (!emailRegex.test(trimmed)) return 'Masukkan format alamat email yang valid.';
+        if (!emailRegex.test(trimmed)) return t.errors.email;
         return '';
       }
       case 'phone': {
         const digitsOnly = trimmed.replace(/\D/g, '');
-        if (digitsOnly.length < 9)
-          return 'Nomor telepon/WhatsApp minimal 9 digit angka.';
+        if (digitsOnly.length < 9) return t.errors.phone;
         return '';
       }
       case 'message':
-        if (trimmed.length < 20)
-          return `Pesan detail minimal 20 karakter (saat ini ${trimmed.length} karakter).`;
+        if (trimmed.length < 20) return t.errors.message(trimmed.length);
         return '';
       default:
         return '';
@@ -96,10 +98,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
 
   const currentErrors = getAllErrors(values);
 
-  const handleChange = (
-    name: keyof FormValues,
-    value: string
-  ) => {
+  const handleChange = (name: keyof FormValues, value: string) => {
     setValues((prev) => ({ ...prev, [name]: value }));
     if (name === 'category') {
       onCategoryChange(value as ConsultationCategory);
@@ -129,21 +128,42 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
   };
 
   const buildWhatsAppUrl = (data: FormValues) => {
-    const text = [
-      `Halo Tim ${COMPANY_CONFIG.companyName} (${COMPANY_CONFIG.brandName}),`,
-      '',
-      `Saya ingin berkonsultasi terkait: *${data.category}*`,
-      `Nama: ${data.fullName}`,
-      `Jabatan & Instansi: ${data.roleAndHospital}`,
-      `Email: ${data.email}`,
-      `No. Telepon/WA: ${data.phone}`,
-      '',
-      `Detail Kebutuhan:`,
-      data.message,
-    ].join('\n');
+    const text = t.waGreeting(
+      COMPANY_CONFIG.companyName,
+      COMPANY_CONFIG.brandName,
+      t.categories[data.category],
+      data.fullName,
+      data.roleAndHospital,
+      data.email,
+      data.phone,
+      data.message
+    );
 
     return `https://wa.me/${COMPANY_CONFIG.whatsappNumberRaw}?text=${encodeURIComponent(
       text
+    )}`;
+  };
+
+  const buildDirectWhatsAppUrl = () => {
+    const prefill = values.message.trim()
+      ? t.waGreeting(
+          COMPANY_CONFIG.companyName,
+          COMPANY_CONFIG.brandName,
+          t.categories[values.category],
+          values.fullName.trim() || '-',
+          values.roleAndHospital.trim() || '-',
+          values.email.trim() || '-',
+          values.phone.trim() || '-',
+          values.message.trim()
+        )
+      : t.waDirectPrefill(
+          COMPANY_CONFIG.companyName,
+          COMPANY_CONFIG.brandName,
+          t.categories[values.category]
+        );
+
+    return `https://wa.me/${COMPANY_CONFIG.whatsappNumberRaw}?text=${encodeURIComponent(
+      prefill
     )}`;
   };
 
@@ -162,12 +182,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
           <div className="max-w-2xl">
             <h2 className="font-display text-2xl sm:text-3xl lg:text-4xl font-bold tracking-tight leading-tight text-balance">
-              Siap Meningkatkan Layanan Haemodialisa &amp; Fasilitas Medis Rumah Sakit
-              Anda?
+              {t.bannerTitle}
             </h2>
             <p className="mt-3 text-sm sm:text-base text-blue-100">
-              Diskusikan skema Kerja Sama Operasional (KSO) yang adaptif dan
-              menguntungkan bersama tim ahli PT Foremed Indo Industri.
+              {t.bannerSubtitle}
             </p>
           </div>
           <div className="shrink-0">
@@ -176,7 +194,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
               onClick={scrollToFormInput}
               className="inline-flex items-center gap-2.5 px-6 py-3.5 rounded-xl bg-white text-[#0B2C5F] text-sm sm:text-base font-bold hover:bg-[#EBF3FA] transition-colors whitespace-nowrap shrink-0 shadow-sm"
             >
-              <span>Hubungi Tim Kami Sekarang</span>
+              <span>{t.bannerCta}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>
@@ -188,14 +206,13 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="max-w-2xl">
             <p className="text-xs sm:text-sm font-semibold tracking-wider text-[#1D63B8] mb-3">
-              HUBUNGI KAMI
+              {t.eyebrow}
             </p>
             <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-[#0F172A] text-balance">
-              Konsultasi KSO &amp; Pengadaan Alat Kesehatan
+              {t.title}
             </h2>
             <p className="mt-4 text-base text-[#475569] leading-relaxed">
-              Sampaikan kebutuhan fasilitas medis rumah sakit Anda. Tim bisnis dan teknis
-              kami siap menjadwalkan presentasi proposal serta simulasi KSO.
+              {t.subtitle}
             </p>
           </div>
 
@@ -204,7 +221,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
             <div className="lg:col-span-5 space-y-6">
               <div className="rounded-2xl bg-[#F8FAFC] border border-slate-200/90 p-6 sm:p-7 space-y-5">
                 <h3 className="font-display text-lg font-bold text-[#0B2C5F]">
-                  Informasi Kantor Pusat
+                  {t.officeTitle}
                 </h3>
 
                 <div className="flex items-start gap-3.5">
@@ -212,7 +229,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <MapPin className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-[#0B2C5F]">Alamat Kantor</p>
+                    <p className="text-xs font-semibold text-[#0B2C5F]">
+                      {t.addressLabel}
+                    </p>
                     <p className="mt-1 text-sm text-[#475569] leading-relaxed">
                       {COMPANY_CONFIG.address}
                     </p>
@@ -224,7 +243,9 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     <Mail className="w-5 h-5" />
                   </div>
                   <div>
-                    <p className="text-xs font-semibold text-[#0B2C5F]">Email Resmi</p>
+                    <p className="text-xs font-semibold text-[#0B2C5F]">
+                      {t.emailLabel}
+                    </p>
                     <a
                       href={`mailto:${COMPANY_CONFIG.email}`}
                       className="mt-1 inline-block text-sm font-medium text-[#1D63B8] hover:underline"
@@ -238,12 +259,12 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   <div className="w-10 h-10 rounded-xl bg-[#EBF3FA] text-[#1D63B8] flex items-center justify-center shrink-0">
                     <Phone className="w-5 h-5" />
                   </div>
-                  <div>
+                  <div className="flex-1 min-w-0">
                     <p className="text-xs font-semibold text-[#0B2C5F]">
-                      WhatsApp Konsultasi
+                      {t.waLabel}
                     </p>
                     <a
-                      href={`https://wa.me/${COMPANY_CONFIG.whatsappNumberRaw}`}
+                      href={buildDirectWhatsAppUrl()}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="mt-1 inline-block text-sm font-medium text-[#0F172A] hover:text-[#1D63B8] tabular-nums"
@@ -253,17 +274,34 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   </div>
                 </div>
 
+                {/* Prominent Direct WhatsApp Action Button */}
+                <div className="pt-1">
+                  <a
+                    href={buildDirectWhatsAppUrl()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full inline-flex items-center justify-center gap-2.5 px-5 py-3.5 rounded-xl bg-[#15803D] text-white text-sm font-semibold hover:bg-[#166534] transition-colors duration-150 shadow-xs focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#15803D]"
+                  >
+                    <MessageCircle className="w-4 h-4 shrink-0" />
+                    <span>{t.waDirectBtn}</span>
+                    <ArrowRight className="w-4 h-4 shrink-0" />
+                  </a>
+                  <p className="mt-2 text-xs text-[#475569] text-center">
+                    {t.waDirectHint}
+                  </p>
+                </div>
+
                 {/* Official Social Media Links */}
                 <div className="pt-4 border-t border-slate-200">
                   <p className="text-xs font-semibold text-[#0B2C5F] mb-3">
-                    Kanal Resmi PT Foremed Indo Industri
+                    {t.socialTitle}
                   </p>
                   <div className="flex flex-wrap items-center gap-2.5">
                     <a
                       href={COMPANY_CONFIG.socials.linkedin}
                       target="_blank"
                       rel="noopener noreferrer"
-                      aria-label="LinkedIn resmi PT Foremed Indo Industri"
+                      aria-label="LinkedIn PT Foremed Indo Industri"
                       className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-[#0B2C5F] hover:border-[#1D63B8] hover:text-[#1D63B8] transition-colors"
                     >
                       <Linkedin className="w-4 h-4" />
@@ -273,7 +311,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                       href={COMPANY_CONFIG.socials.instagram}
                       target="_blank"
                       rel="noopener noreferrer"
-                      aria-label="Instagram resmi FII Kidney Health"
+                      aria-label="Instagram FII Kidney Health"
                       className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-[#0B2C5F] hover:border-[#1D63B8] hover:text-[#1D63B8] transition-colors"
                     >
                       <Instagram className="w-4 h-4" />
@@ -283,7 +321,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                       href={COMPANY_CONFIG.socials.youtube}
                       target="_blank"
                       rel="noopener noreferrer"
-                      aria-label="YouTube resmi FII Kidney Health"
+                      aria-label="YouTube FII Kidney Health"
                       className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white border border-slate-200 text-xs font-semibold text-[#0B2C5F] hover:border-[#1D63B8] hover:text-[#1D63B8] transition-colors"
                     >
                       <Youtube className="w-4 h-4" />
@@ -297,7 +335,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
               <div className="rounded-2xl overflow-hidden border border-slate-200 bg-[#F8FAFC]">
                 <div className="aspect-[16/10] w-full">
                   <iframe
-                    title="Lokasi Kantor PT Foremed Indo Industri Jakarta Barat"
+                    title={t.mapTitle}
                     src={COMPANY_CONFIG.googleMapsEmbedUrl}
                     loading="lazy"
                     referrerPolicy="no-referrer-when-downgrade"
@@ -306,16 +344,14 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   />
                 </div>
                 <div className="px-4 py-3 bg-white border-t border-slate-100 flex items-center justify-between gap-3 text-xs">
-                  <span className="text-[#475569] truncate">
-                    Tambora, Jakarta Barat 11330
-                  </span>
+                  <span className="text-[#475569] truncate">{t.mapArea}</span>
                   <a
                     href={COMPANY_CONFIG.googleMapsDirectUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1 font-semibold text-[#1D63B8] hover:underline shrink-0"
                   >
-                    <span>Buka Peta</span>
+                    <span>{t.openMap}</span>
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
                 </div>
@@ -332,33 +368,32 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     </div>
 
                     <h3 className="mt-5 font-display text-2xl font-bold text-[#0F172A]">
-                      Permintaan Konsultasi Diterima
+                      {t.successTitle}
                     </h3>
 
                     <p className="mt-2.5 text-sm sm:text-base text-[#475569] leading-relaxed">
-                      Terima kasih,{' '}
-                      <span className="font-semibold text-[#0F172A]">
-                        {submittedData.fullName}
-                      </span>
-                      . Ringkasan pengajuan untuk kategori{' '}
-                      <span className="font-semibold text-[#1D63B8]">
-                        {submittedData.category}
-                      </span>{' '}
-                      telah tercatat dan siap ditindaklanjuti oleh tim kemitraan kami.
+                      {t.successBody(
+                        submittedData.fullName,
+                        t.categories[submittedData.category]
+                      )}
                     </p>
 
                     <div className="mt-6 rounded-xl bg-[#F8FAFC] border border-slate-200 p-4 text-left text-xs sm:text-sm space-y-1.5 text-[#475569]">
                       <p>
-                        <span className="font-semibold text-[#0F172A]">Instansi:</span>{' '}
+                        <span className="font-semibold text-[#0F172A]">
+                          {t.summaryHospital}
+                        </span>{' '}
                         {submittedData.roleAndHospital}
                       </p>
                       <p>
-                        <span className="font-semibold text-[#0F172A]">Email:</span>{' '}
+                        <span className="font-semibold text-[#0F172A]">
+                          {t.summaryEmail}
+                        </span>{' '}
                         {submittedData.email}
                       </p>
                       <p>
                         <span className="font-semibold text-[#0F172A]">
-                          Telepon / WA:
+                          {t.summaryPhone}
                         </span>{' '}
                         {submittedData.phone}
                       </p>
@@ -372,7 +407,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#0B2C5F] text-white text-sm font-semibold hover:bg-[#1D63B8] transition-colors whitespace-nowrap"
                       >
                         <MessageCircle className="w-4 h-4" />
-                        <span>Lanjutkan via WhatsApp</span>
+                        <span>{t.waBtn}</span>
                       </a>
 
                       <button
@@ -391,7 +426,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         }}
                         className="w-full sm:w-auto px-5 py-3.5 rounded-xl border border-slate-200 text-sm font-semibold text-[#475569] hover:text-[#0F172A] hover:bg-slate-50 transition-colors"
                       >
-                        Kirim Pertanyaan Lain
+                        {t.resetFormBtn}
                       </button>
                     </div>
                   </div>
@@ -399,11 +434,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                   <form onSubmit={handleSubmit} noValidate className="space-y-5">
                     <div>
                       <h3 className="font-display text-xl font-bold text-[#0F172A]">
-                        Formulir Pengajuan Proposal &amp; Konsultasi
+                        {t.formTitle}
                       </h3>
                       <p className="mt-1 text-sm text-[#475569]">
-                        Lengkapi data di bawah ini untuk mendapatkan respon cepat dari
-                        tim spesialis KSO kami.
+                        {t.formSubtitle}
                       </p>
                     </div>
 
@@ -413,7 +447,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                           htmlFor="contact-full-name"
                           className="block text-sm font-semibold text-[#0F172A] mb-1.5"
                         >
-                          Nama Lengkap *
+                          {t.fields.fullName}
                         </label>
                         <input
                           id="contact-full-name"
@@ -421,8 +455,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                           value={values.fullName}
                           onChange={(e) => handleChange('fullName', e.target.value)}
                           onBlur={() => handleBlur('fullName')}
-                          placeholder="Dr. Hendra Wijaya, MARS"
-                          aria-invalid={Boolean(touched.fullName && currentErrors.fullName)}
+                          placeholder={t.fields.fullNamePlaceholder}
+                          aria-invalid={Boolean(
+                            touched.fullName && currentErrors.fullName
+                          )}
                           className={`w-full rounded-xl border px-4 py-2.5 text-sm text-[#0F172A] focus:outline-none focus:ring-2 ${
                             touched.fullName && currentErrors.fullName
                               ? 'border-red-400 focus:border-red-500 focus:ring-red-100'
@@ -441,7 +477,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                           htmlFor="contact-role-hospital"
                           className="block text-sm font-semibold text-[#0F172A] mb-1.5"
                         >
-                          Jabatan &amp; Nama Rumah Sakit/Instansi *
+                          {t.fields.roleAndHospital}
                         </label>
                         <input
                           id="contact-role-hospital"
@@ -451,7 +487,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                             handleChange('roleAndHospital', e.target.value)
                           }
                           onBlur={() => handleBlur('roleAndHospital')}
-                          placeholder="Direktur Utama — RS Harapan Sehat"
+                          placeholder={t.fields.rolePlaceholder}
                           aria-invalid={Boolean(
                             touched.roleAndHospital && currentErrors.roleAndHospital
                           )}
@@ -475,7 +511,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                           htmlFor="contact-email"
                           className="block text-sm font-semibold text-[#0F172A] mb-1.5"
                         >
-                          Email *
+                          {t.fields.email}
                         </label>
                         <input
                           id="contact-email"
@@ -483,7 +519,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                           value={values.email}
                           onChange={(e) => handleChange('email', e.target.value)}
                           onBlur={() => handleBlur('email')}
-                          placeholder="pengadaan@rumahsakit.co.id"
+                          placeholder={t.fields.emailPlaceholder}
                           aria-invalid={Boolean(touched.email && currentErrors.email)}
                           className={`w-full rounded-xl border px-4 py-2.5 text-sm text-[#0F172A] focus:outline-none focus:ring-2 ${
                             touched.email && currentErrors.email
@@ -503,7 +539,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                           htmlFor="contact-phone"
                           className="block text-sm font-semibold text-[#0F172A] mb-1.5"
                         >
-                          Nomor Telepon / WhatsApp *
+                          {t.fields.phone}
                         </label>
                         <input
                           id="contact-phone"
@@ -511,7 +547,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                           value={values.phone}
                           onChange={(e) => handleChange('phone', e.target.value)}
                           onBlur={() => handleBlur('phone')}
-                          placeholder="0812-xxxx-xxxx"
+                          placeholder={t.fields.phonePlaceholder}
                           aria-invalid={Boolean(touched.phone && currentErrors.phone)}
                           className={`w-full rounded-xl border px-4 py-2.5 text-sm tabular-nums text-[#0F172A] focus:outline-none focus:ring-2 ${
                             touched.phone && currentErrors.phone
@@ -532,7 +568,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         htmlFor="contact-category"
                         className="block text-sm font-semibold text-[#0F172A] mb-1.5"
                       >
-                        Kategori Kebutuhan *
+                        {t.fields.category}
                       </label>
                       <select
                         id="contact-category"
@@ -542,7 +578,7 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                       >
                         {CONSULTATION_CATEGORIES.map((cat) => (
                           <option key={cat} value={cat}>
-                            {cat}
+                            {t.categories[cat]}
                           </option>
                         ))}
                       </select>
@@ -554,10 +590,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                           htmlFor="contact-message"
                           className="block text-sm font-semibold text-[#0F172A]"
                         >
-                          Pesan Detail Kebutuhan *
+                          {t.fields.message}
                         </label>
                         <span className="text-xs text-[#475569] tabular-nums">
-                          {values.message.trim().length} / min. 20 karakter
+                          {t.fields.charCount(values.message.trim().length)}
                         </span>
                       </div>
                       <textarea
@@ -566,8 +602,10 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                         value={values.message}
                         onChange={(e) => handleChange('message', e.target.value)}
                         onBlur={() => handleBlur('message')}
-                        placeholder="Jelaskan rencana kapasitas unit mesin haemodialisa, lokasi rumah sakit, atau kebutuhan pengadaan alkes yang ingin didiskusikan..."
-                        aria-invalid={Boolean(touched.message && currentErrors.message)}
+                        placeholder={t.fields.messagePlaceholder}
+                        aria-invalid={Boolean(
+                          touched.message && currentErrors.message
+                        )}
                         className={`w-full rounded-xl border px-4 py-2.5 text-sm text-[#0F172A] focus:outline-none focus:ring-2 ${
                           touched.message && currentErrors.message
                             ? 'border-red-400 focus:border-red-500 focus:ring-red-100'
@@ -582,15 +620,12 @@ export const ContactSection: React.FC<ContactSectionProps> = ({
                     </div>
 
                     <div className="pt-2 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                      <p className="text-xs text-[#475569]">
-                        Dengan mengirim formulir ini, Anda menyetujui komunikasi tindak
-                        lanjut dari tim kemitraan PT Foremed Indo Industri.
-                      </p>
+                      <p className="text-xs text-[#475569]">{t.consentNote}</p>
                       <button
                         type="submit"
                         className="inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-xl bg-[#0B2C5F] text-white text-sm font-semibold hover:bg-[#1D63B8] transition-colors whitespace-nowrap shrink-0 shadow-xs"
                       >
-                        <span>Kirim Permintaan Konsultasi</span>
+                        <span>{t.submitBtn}</span>
                         <ArrowRight className="w-4 h-4" />
                       </button>
                     </div>

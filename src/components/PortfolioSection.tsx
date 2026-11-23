@@ -1,7 +1,9 @@
 import React, { useMemo, useState } from 'react';
 import { Film, Image as ImageIcon, MapPin, Play, Plus } from 'lucide-react';
+import { getTranslations } from '../i18n/translations';
 import {
   ConsultationCategory,
+  Language,
   PortfolioCategory,
   PortfolioItem,
 } from '../types';
@@ -10,6 +12,7 @@ import { PortfolioLightboxModal } from './PortfolioLightboxModal';
 import { ResilientImage } from './ResilientImage';
 
 interface PortfolioSectionProps {
+  language: Language;
   items: PortfolioItem[];
   onAddItem: (item: PortfolioItem) => void;
   onDeleteItem: (id: string) => void;
@@ -25,6 +28,7 @@ const FILTER_TABS: PortfolioCategory[] = [
 ];
 
 export const PortfolioSection: React.FC<PortfolioSectionProps> = ({
+  language,
   items,
   onAddItem,
   onDeleteItem,
@@ -35,26 +39,30 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({
   const [selectedItem, setSelectedItem] = useState<PortfolioItem | null>(null);
   const [adminOpen, setAdminOpen] = useState(false);
 
+  const t = getTranslations(language).portfolio;
+
   const filteredItems = useMemo(() => {
     if (activeFilter === 'Semua') return items;
     return items.filter((item) => item.category === activeFilter);
   }, [items, activeFilter]);
 
   return (
-    <section id="portofolio" className="py-20 lg:py-24 bg-white border-t border-slate-200/70">
+    <section
+      id="portofolio"
+      className="py-20 lg:py-24 bg-white border-t border-slate-200/70"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header + Admin Mode Button */}
         <div className="flex flex-col lg:flex-row lg:items-end lg:justify-between gap-6">
           <div className="max-w-2xl">
             <p className="text-xs sm:text-sm font-semibold tracking-wider text-[#1D63B8] mb-3">
-              PORTOFOLIO &amp; DOKUMENTASI PROYEK
+              {t.eyebrow}
             </p>
             <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-[#0F172A] text-balance">
-              Rekam Jejak Instalasi &amp; Kemitraan Medis
+              {t.title}
             </h2>
             <p className="mt-4 text-base text-[#475569] leading-relaxed">
-              Dokumentasi pemasangan unit haemodialisa, fasilitas radiologi, serta
-              pelatihan klinis di berbagai rumah sakit mitra di Indonesia.
+              {t.subtitle}
             </p>
           </div>
 
@@ -65,7 +73,7 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({
               className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl border border-slate-200 bg-[#F8FAFC] text-[#0B2C5F] text-sm font-semibold hover:border-[#1D63B8] hover:bg-[#EBF3FA] transition-colors whitespace-nowrap shrink-0"
             >
               <Plus className="w-4 h-4 text-[#1D63B8]" />
-              <span>Mode Admin (Tambah Portofolio)</span>
+              <span>{t.adminBtn}</span>
             </button>
           </div>
         </div>
@@ -74,7 +82,7 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({
         <div className="mt-10 flex flex-wrap items-center gap-2">
           <div
             role="tablist"
-            aria-label="Filter kategori portofolio"
+            aria-label={t.filterAria}
             className="inline-flex flex-wrap items-center gap-1.5 p-1.5 rounded-xl bg-[#F8FAFC] border border-slate-200/80"
           >
             {FILTER_TABS.map((tab) => {
@@ -92,14 +100,14 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({
                       : 'text-[#475569] hover:text-[#0B2C5F] hover:bg-white/80'
                   }`}
                 >
-                  {tab}
+                  {t.filters[tab]}
                 </button>
               );
             })}
           </div>
 
           <span className="text-xs sm:text-sm text-[#475569] ml-1 tabular-nums">
-            Menampilkan {filteredItems.length} proyek
+            {t.showingCount(filteredItems.length)}
           </span>
         </div>
 
@@ -107,16 +115,21 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({
         {filteredItems.length === 0 ? (
           <div className="mt-10 rounded-2xl border border-dashed border-slate-300 bg-[#F8FAFC] p-12 text-center">
             <p className="font-display text-lg font-semibold text-[#0F172A]">
-              Belum ada proyek pada kategori ini
+              {t.emptyTitle}
             </p>
-            <p className="mt-1.5 text-sm text-[#475569]">
-              Pilih kategori lain atau tambahkan dokumentasi proyek melalui Mode Admin.
-            </p>
+            <p className="mt-1.5 text-sm text-[#475569]">{t.emptySubtitle}</p>
           </div>
         ) : (
           <div className="mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredItems.map((item) => {
               const isVideo = item.mediaType === 'VIDEO';
+              const localizedTitle =
+                language === 'en' && item.titleEn ? item.titleEn : item.title;
+              const localizedLocation =
+                language === 'en' && item.locationEn
+                  ? item.locationEn
+                  : item.location;
+
               return (
                 <article
                   key={item.id}
@@ -125,14 +138,14 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({
                   <button
                     type="button"
                     onClick={() => setSelectedItem(item)}
-                    aria-label={`Lihat detail ${item.title}`}
+                    aria-label={t.viewDetailAria(localizedTitle)}
                     className="text-left flex flex-col flex-1 focus-visible:outline-2 focus-visible:outline-[#1D63B8]"
                   >
                     {/* Thumbnail Area */}
                     <div className="relative w-full aspect-[4/3] bg-slate-100 overflow-hidden">
                       <ResilientImage
                         src={item.thumbnailUrl}
-                        alt={`${item.title} — ${item.location}`}
+                        alt={`${localizedTitle} — ${localizedLocation}`}
                         className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.03]"
                       />
 
@@ -155,7 +168,7 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({
                         ) : (
                           <ImageIcon className="w-3.5 h-3.5 text-blue-300" />
                         )}
-                        <span>{isVideo ? 'Video' : 'Foto'}</span>
+                        <span>{isVideo ? t.mediaVideo : t.mediaPhoto}</span>
                       </div>
                     </div>
 
@@ -164,7 +177,7 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({
                       <div>
                         <div className="flex flex-wrap items-center gap-2 text-xs text-[#475569] mb-2">
                           <span className="font-semibold text-[#1D63B8]">
-                            {item.category}
+                            {t.filters[item.category]}
                           </span>
                           <span aria-hidden="true">·</span>
                           <span className="tabular-nums">{item.year}</span>
@@ -172,20 +185,20 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({
                             <>
                               <span aria-hidden="true">·</span>
                               <span className="text-[#0B2C5F] font-medium">
-                                Tambahan Admin
+                                {t.customTag}
                               </span>
                             </>
                           )}
                         </div>
 
                         <h3 className="font-display text-lg font-bold text-[#0F172A] leading-snug group-hover:text-[#1D63B8] transition-colors">
-                          {item.title}
+                          {localizedTitle}
                         </h3>
                       </div>
 
                       <div className="mt-4 pt-4 border-t border-slate-100 flex items-center gap-1.5 text-xs sm:text-sm text-[#475569]">
                         <MapPin className="w-4 h-4 text-[#1D63B8] shrink-0" />
-                        <span className="truncate">{item.location}</span>
+                        <span className="truncate">{localizedLocation}</span>
                       </div>
                     </div>
                   </button>
@@ -198,6 +211,7 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({
 
       {/* Lightbox Modal */}
       <PortfolioLightboxModal
+        language={language}
         item={selectedItem}
         onClose={() => setSelectedItem(null)}
         onInquire={onConsultKso}
@@ -205,6 +219,7 @@ export const PortfolioSection: React.FC<PortfolioSectionProps> = ({
 
       {/* Admin Mode Modal */}
       <AdminPortfolioModal
+        language={language}
         isOpen={adminOpen}
         items={items}
         onClose={() => setAdminOpen(false)}

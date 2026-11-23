@@ -1,20 +1,26 @@
 import React, { useEffect } from 'react';
 import { ArrowRight, Calendar, MapPin, X } from 'lucide-react';
-import { ConsultationCategory, PortfolioItem } from '../types';
+import { getTranslations } from '../i18n/translations';
+import { ConsultationCategory, Language, PortfolioItem } from '../types';
 import { ClinicalVideoPlayer } from './ClinicalVideoPlayer';
 import { ResilientImage } from './ResilientImage';
 
 interface PortfolioLightboxModalProps {
+  language: Language;
   item: PortfolioItem | null;
   onClose: () => void;
   onInquire: (category: ConsultationCategory) => void;
 }
 
 export const PortfolioLightboxModal: React.FC<PortfolioLightboxModalProps> = ({
+  language,
   item,
   onClose,
   onInquire,
 }) => {
+  const tAll = getTranslations(language).portfolio;
+  const t = tAll.lightbox;
+
   useEffect(() => {
     if (!item) return;
 
@@ -31,6 +37,23 @@ export const PortfolioLightboxModal: React.FC<PortfolioLightboxModalProps> = ({
   }, [item, onClose]);
 
   if (!item) return null;
+
+  const localizedTitle =
+    language === 'en' && item.titleEn ? item.titleEn : item.title;
+  const localizedLocation =
+    language === 'en' && item.locationEn ? item.locationEn : item.location;
+  const localizedDescription =
+    language === 'en' && item.descriptionEn
+      ? item.descriptionEn
+      : item.description;
+  const localizedSpecs =
+    language === 'en' && item.specsEn && item.specsEn.length > 0
+      ? item.specsEn
+      : item.specs;
+  const localizedHighlights =
+    language === 'en' && item.videoHighlightsEn
+      ? item.videoHighlightsEn
+      : item.videoHighlights;
 
   const mapPortfolioToConsultation = (
     category: PortfolioItem['category']
@@ -56,10 +79,10 @@ export const PortfolioLightboxModal: React.FC<PortfolioLightboxModalProps> = ({
         <div className="sticky top-0 z-10 bg-white/95 backdrop-blur-sm border-b border-slate-100 px-6 py-4 flex items-center justify-between gap-4">
           <div className="flex flex-wrap items-center gap-2 text-xs font-medium text-[#475569]">
             <span className="text-[#1D63B8] font-semibold">
-              {item.mediaType === 'VIDEO' ? 'Video Dokumentasi' : 'Foto Proyek'}
+              {item.mediaType === 'VIDEO' ? t.videoBadge : t.photoBadge}
             </span>
             <span aria-hidden="true">·</span>
-            <span>{item.category}</span>
+            <span>{tAll.filters[item.category]}</span>
             <span aria-hidden="true">·</span>
             <span className="tabular-nums">{item.year}</span>
           </div>
@@ -67,7 +90,7 @@ export const PortfolioLightboxModal: React.FC<PortfolioLightboxModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            aria-label="Tutup pratinjau proyek"
+            aria-label={t.closeAria}
             className="w-9 h-9 rounded-lg border border-slate-200 text-[#475569] hover:text-[#0F172A] hover:bg-slate-50 flex items-center justify-center transition-colors"
           >
             <X className="w-5 h-5" />
@@ -78,16 +101,17 @@ export const PortfolioLightboxModal: React.FC<PortfolioLightboxModalProps> = ({
         <div className="p-6 pb-2">
           {item.mediaType === 'VIDEO' ? (
             <ClinicalVideoPlayer
+              language={language}
               mediaUrl={item.mediaUrl}
               thumbnailUrl={item.thumbnailUrl}
-              title={item.title}
-              highlights={item.videoHighlights}
+              title={localizedTitle}
+              highlights={localizedHighlights}
             />
           ) : (
             <div className="w-full aspect-video rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
               <ResilientImage
                 src={item.mediaUrl || item.thumbnailUrl}
-                alt={item.title}
+                alt={localizedTitle}
                 className="w-full h-full object-cover"
               />
             </div>
@@ -100,34 +124,36 @@ export const PortfolioLightboxModal: React.FC<PortfolioLightboxModalProps> = ({
             id="lightbox-title"
             className="font-display text-xl sm:text-2xl font-bold text-[#0F172A] leading-snug"
           >
-            {item.title}
+            {localizedTitle}
           </h3>
 
           <div className="mt-2.5 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm text-[#475569]">
             <span className="inline-flex items-center gap-1.5">
               <MapPin className="w-4 h-4 text-[#1D63B8]" />
-              <span>{item.location}</span>
+              <span>{localizedLocation}</span>
             </span>
             <span className="inline-flex items-center gap-1.5 tabular-nums">
               <Calendar className="w-4 h-4 text-[#1D63B8]" />
-              <span>Tahun {item.year}</span>
+              <span>
+                {t.yearPrefix} {item.year}
+              </span>
             </span>
           </div>
 
           <p className="mt-4 text-sm sm:text-base text-[#475569] leading-relaxed">
-            {item.description}
+            {localizedDescription}
           </p>
 
-          {item.specs && item.specs.length > 0 && (
+          {localizedSpecs && localizedSpecs.length > 0 && (
             <div className="mt-5 pt-5 border-t border-slate-100">
               <p className="text-xs font-semibold tracking-wider text-[#0B2C5F] mb-2">
-                CAKUPAN TEKNIS PROYEK
+                {t.specsHeading}
               </p>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-sm text-[#0F172A] font-medium">
-                {item.specs.map((spec, idx) => (
+                {localizedSpecs.map((spec, idx) => (
                   <React.Fragment key={spec}>
                     <span>{spec}</span>
-                    {idx < item.specs.length - 1 && (
+                    {idx < localizedSpecs.length - 1 && (
                       <span aria-hidden="true" className="text-slate-300">
                         /
                       </span>
@@ -144,7 +170,7 @@ export const PortfolioLightboxModal: React.FC<PortfolioLightboxModalProps> = ({
               onClick={onClose}
               className="px-4 py-2.5 rounded-xl border border-slate-200 text-sm font-medium text-[#475569] hover:text-[#0F172A] hover:bg-slate-50 transition-colors"
             >
-              Tutup
+              {t.closeBtn}
             </button>
 
             <button
@@ -155,7 +181,7 @@ export const PortfolioLightboxModal: React.FC<PortfolioLightboxModalProps> = ({
               }}
               className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#0B2C5F] text-white text-sm font-semibold hover:bg-[#1D63B8] transition-colors"
             >
-              <span>Konsultasikan Kebutuhan Serupa</span>
+              <span>{t.inquireBtn}</span>
               <ArrowRight className="w-4 h-4" />
             </button>
           </div>

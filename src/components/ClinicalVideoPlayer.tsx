@@ -1,8 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Pause, Play, RotateCcw, Volume2, VolumeX } from 'lucide-react';
+import { getTranslations } from '../i18n/translations';
+import { Language } from '../types';
 import { ResilientImage } from './ResilientImage';
 
 interface ClinicalVideoPlayerProps {
+  language: Language;
   mediaUrl: string;
   thumbnailUrl: string;
   title: string;
@@ -12,11 +15,14 @@ interface ClinicalVideoPlayerProps {
 const DEMO_DURATION_SECONDS = 30;
 
 export const ClinicalVideoPlayer: React.FC<ClinicalVideoPlayerProps> = ({
+  language,
   mediaUrl,
   thumbnailUrl,
   title,
   highlights,
 }) => {
+  const t = getTranslations(language).portfolio.videoPlayer;
+
   const isNativeVideo = useMemo(() => {
     const lower = mediaUrl.toLowerCase();
     return (
@@ -59,7 +65,7 @@ export const ClinicalVideoPlayer: React.FC<ClinicalVideoPlayerProps> = ({
           playsInline
           className="w-full h-full object-contain"
         >
-          Peramban Anda tidak mendukung pemutar video HTML5.
+          {t.unsupported}
         </video>
       </div>
     );
@@ -118,7 +124,7 @@ export const ClinicalVideoPlayer: React.FC<ClinicalVideoPlayerProps> = ({
         <button
           type="button"
           onClick={handleTogglePlay}
-          aria-label="Putar dokumentasi video"
+          aria-label={t.playAria}
           className="absolute inset-0 m-auto w-16 h-16 rounded-full bg-white/95 text-[#0B2C5F] shadow-lg flex items-center justify-center hover:scale-105 transition-transform focus-visible:outline-2 focus-visible:outline-white"
         >
           <Play className="w-7 h-7 fill-current ml-0.5" />
@@ -140,7 +146,7 @@ export const ClinicalVideoPlayer: React.FC<ClinicalVideoPlayerProps> = ({
             min={0}
             max={DEMO_DURATION_SECONDS}
             value={currentTime}
-            aria-label="Progres video dokumentasi"
+            aria-label={t.scrubberAria}
             onChange={(e) => setCurrentTime(Number(e.target.value))}
             className="w-full h-1.5 accent-[#1D63B8] cursor-pointer rounded-lg bg-white/25"
           />
@@ -151,7 +157,7 @@ export const ClinicalVideoPlayer: React.FC<ClinicalVideoPlayerProps> = ({
             <button
               type="button"
               onClick={handleTogglePlay}
-              aria-label={isPlaying ? 'Jeda video' : 'Putar video'}
+              aria-label={isPlaying ? t.pauseAria : t.playAria}
               className="w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors"
             >
               {isPlaying ? (
@@ -164,7 +170,7 @@ export const ClinicalVideoPlayer: React.FC<ClinicalVideoPlayerProps> = ({
             <button
               type="button"
               onClick={handleReplay}
-              aria-label="Putar ulang video"
+              aria-label={t.replayAria}
               className="w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors"
             >
               <RotateCcw className="w-4 h-4" />
@@ -173,7 +179,7 @@ export const ClinicalVideoPlayer: React.FC<ClinicalVideoPlayerProps> = ({
             <button
               type="button"
               onClick={() => setIsMuted((prev) => !prev)}
-              aria-label={isMuted ? 'Aktifkan suara' : 'Bisukan suara'}
+              aria-label={isMuted ? t.unmuteAria : t.muteAria}
               className="w-9 h-9 rounded-lg bg-white/15 hover:bg-white/25 flex items-center justify-center transition-colors"
             >
               {isMuted ? (
@@ -189,7 +195,7 @@ export const ClinicalVideoPlayer: React.FC<ClinicalVideoPlayerProps> = ({
           </div>
 
           <span className="text-xs text-slate-300 hidden sm:inline">
-            Dokumentasi Teknis ({Math.round(progressPercent)}%)
+            {t.statusLabel(Math.round(progressPercent))}
           </span>
         </div>
       </div>

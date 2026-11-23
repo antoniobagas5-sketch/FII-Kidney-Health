@@ -7,9 +7,17 @@ import { Navbar } from './components/Navbar';
 import { PortfolioSection } from './components/PortfolioSection';
 import { ServicesSection } from './components/ServicesSection';
 import { INITIAL_PORTFOLIO_ITEMS } from './data/companyData';
-import { ConsultationCategory, NavSectionId, PortfolioItem } from './types';
+import { getTranslations } from './i18n/translations';
+import {
+  ConsultationCategory,
+  Language,
+  NavSectionId,
+  PortfolioItem,
+} from './types';
 
 const STORAGE_KEY = 'fii_portfolio_items_v1';
+const LANGUAGE_STORAGE_KEY = 'fii_language_v1';
+
 const SECTION_IDS: NavSectionId[] = [
   'home',
   'services',
@@ -18,13 +26,29 @@ const SECTION_IDS: NavSectionId[] = [
   'contact',
 ];
 
+function loadInitialLanguage(): Language {
+  try {
+    const saved = window.localStorage.getItem(LANGUAGE_STORAGE_KEY);
+    if (saved === 'en' || saved === 'id') return saved;
+  } catch {
+    // Ignore storage errors
+  }
+  return 'id';
+}
+
 function loadInitialPortfolio(): PortfolioItem[] {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return INITIAL_PORTFOLIO_ITEMS;
     const parsed = JSON.parse(raw) as PortfolioItem[];
     if (Array.isArray(parsed) && parsed.length > 0) {
-      return parsed;
+      const seedById = new Map(
+        INITIAL_PORTFOLIO_ITEMS.map((item) => [item.id, item])
+      );
+      return parsed.map((item) => {
+        const seed = seedById.get(item.id);
+        return seed ? { ...seed, ...item, titleEn: seed.titleEn, locationEn: seed.locationEn, descriptionEn: seed.descriptionEn, specsEn: seed.specsEn, videoHighlightsEn: seed.videoHighlightsEn } : item;
+      });
     }
     return INITIAL_PORTFOLIO_ITEMS;
   } catch {
@@ -33,12 +57,24 @@ function loadInitialPortfolio(): PortfolioItem[] {
 }
 
 export default function App() {
+  const [language, setLanguage] = useState<Language>(loadInitialLanguage);
   const [activeSection, setActiveSection] = useState<NavSectionId>('home');
   const [selectedCategory, setSelectedCategory] =
     useState<ConsultationCategory>('KSO Mesin Haemodialisa');
   const [portfolioItems, setPortfolioItems] = useState<PortfolioItem[]>(
     loadInitialPortfolio
   );
+
+  // Sync language preference to localStorage, <html lang>, and document title
+  useEffect(() => {
+    document.documentElement.lang = language;
+    document.title = getTranslations(language).metaTitle;
+    try {
+      window.localStorage.setItem(LANGUAGE_STORAGE_KEY, language);
+    } catch {
+      // Ignore storage errors
+    }
+  }, [language]);
 
   // Persist portfolio items to localStorage whenever updated
   useEffect(() => {
@@ -115,6 +151,8 @@ export default function App() {
   return (
     <div className="min-h-screen flex flex-col bg-white text-[#0F172A]">
       <Navbar
+        language={language}
+        onLanguageChange={setLanguage}
         activeSection={activeSection}
         onNavigate={handleNavigate}
         onConsultKso={handleConsultKso}
@@ -122,13 +160,19 @@ export default function App() {
 
       <main className="flex-1">
         <HeroSection
+          language={language}
+          onLanguageChange={setLanguage}
           onConsultKso={handleConsultKso}
           onNavigate={handleNavigate}
         />
 
-        <ServicesSection onConsultKso={handleConsultKso} />
+        <ServicesSection
+          language={language}
+          onConsultKso={handleConsultKso}
+        />
 
         <PortfolioSection
+          language={language}
           items={portfolioItems}
           onAddItem={handleAddPortfolioItem}
           onDeleteItem={handleDeletePortfolioItem}
@@ -136,15 +180,20 @@ export default function App() {
           onConsultKso={handleConsultKso}
         />
 
-        <AboutSection />
+        <AboutSection language={language} />
 
         <ContactSection
+          language={language}
           selectedCategory={selectedCategory}
           onCategoryChange={setSelectedCategory}
         />
       </main>
 
-      <Footer onNavigate={handleNavigate} />
+      <Footer
+        language={language}
+        onLanguageChange={setLanguage}
+        onNavigate={handleNavigate}
+      />
     </div>
   );
 }

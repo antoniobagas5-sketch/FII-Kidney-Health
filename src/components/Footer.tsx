@@ -1,21 +1,31 @@
 import React from 'react';
 import { Instagram, Linkedin, Mail, MapPin, Youtube } from 'lucide-react';
 import { COMPANY_CONFIG } from '../data/companyData';
-import { NavSectionId } from '../types';
+import { getTranslations } from '../i18n/translations';
+import { Language, NavSectionId } from '../types';
 import { BrandLogo } from './BrandLogo';
+import { LanguageToggle } from './LanguageToggle';
 
 interface FooterProps {
+  language: Language;
+  onLanguageChange: (lang: Language) => void;
   onNavigate: (section: NavSectionId) => void;
 }
 
-export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
-  const quickLinks: { id: NavSectionId; label: string }[] = [
-    { id: 'home', label: 'Home' },
-    { id: 'services', label: 'Layanan & Skema KSO' },
-    { id: 'portofolio', label: 'Portofolio Proyek' },
-    { id: 'about', label: 'Profil & Manajemen' },
-    { id: 'contact', label: 'Hubungi Kami' },
-  ];
+const LINK_IDS: NavSectionId[] = [
+  'home',
+  'services',
+  'portofolio',
+  'about',
+  'contact',
+];
+
+export const Footer: React.FC<FooterProps> = ({
+  language,
+  onLanguageChange,
+  onNavigate,
+}) => {
+  const t = getTranslations(language).footer;
 
   return (
     <footer className="bg-[#0B2C5F] text-white border-t border-white/10">
@@ -25,9 +35,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           <div className="md:col-span-5 space-y-4">
             <BrandLogo variant="footer" tone="light" />
             <p className="text-sm text-blue-100/90 leading-relaxed max-w-md">
-              Perusahaan nasional penyedia Kerja Sama Operasional (KSO) mesin
-              haemodialisa, radiologi, dan teknologi alat kesehatan terpadu bagi rumah
-              sakit di seluruh Indonesia.
+              {t.summary}
             </p>
             <div className="flex items-center gap-2.5 pt-2">
               <a
@@ -63,20 +71,20 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           {/* Column 2: Quick Navigation */}
           <div className="md:col-span-3">
             <h3 className="font-display text-sm font-bold text-white tracking-wide mb-4">
-              Navigasi Cepat
+              {t.navTitle}
             </h3>
             <ul className="space-y-2.5 text-sm text-blue-100/90">
-              {quickLinks.map((link) => (
-                <li key={link.id}>
+              {LINK_IDS.map((id) => (
+                <li key={id}>
                   <a
-                    href={`#${link.id}`}
+                    href={`#${id}`}
                     onClick={(e) => {
                       e.preventDefault();
-                      onNavigate(link.id);
+                      onNavigate(id);
                     }}
                     className="hover:text-white transition-colors"
                   >
-                    {link.label}
+                    {t.navLinks[id]}
                   </a>
                 </li>
               ))}
@@ -86,7 +94,7 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           {/* Column 3: Office Contact */}
           <div className="md:col-span-4 space-y-3">
             <h3 className="font-display text-sm font-bold text-white tracking-wide mb-4">
-              Kontak Perusahaan
+              {t.contactTitle}
             </h3>
             <div className="flex items-start gap-2.5 text-sm text-blue-100/90">
               <MapPin className="w-4 h-4 text-blue-300 shrink-0 mt-1" />
@@ -104,10 +112,17 @@ export const Footer: React.FC<FooterProps> = ({ onNavigate }) => {
           </div>
         </div>
 
-        {/* Bottom Copyright Line */}
-        <div className="mt-12 pt-6 border-t border-white/15 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-blue-200/80">
-          <p>© 2025–2026 PT Foremed Indo Industri. All Rights Reserved.</p>
-          <p>FII Kidney Health — Solusi Teknologi Medis Indonesia</p>
+        {/* Bottom Copyright & Language Selector Line */}
+        <div className="mt-12 pt-6 border-t border-white/15 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-blue-200/80">
+          <p>{t.copyright}</p>
+          <div className="flex items-center gap-4">
+            <p className="hidden md:block">{t.tagline}</p>
+            <LanguageToggle
+              language={language}
+              onChange={onLanguageChange}
+              variant="dark"
+            />
+          </div>
         </div>
       </div>
     </footer>

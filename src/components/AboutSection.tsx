@@ -5,11 +5,22 @@ import {
   LEGALITY_ITEMS,
   LOCAL_ASSETS,
 } from '../data/companyData';
+import { getTranslations } from '../i18n/translations';
+import { Language } from '../types';
 import { ResilientImage } from './ResilientImage';
 
-export const AboutSection: React.FC = () => {
+interface AboutSectionProps {
+  language: Language;
+}
+
+export const AboutSection: React.FC<AboutSectionProps> = ({ language }) => {
+  const t = getTranslations(language).about;
+
   return (
-    <section id="about" className="py-20 lg:py-24 bg-[#F8FAFC] border-t border-slate-200/70">
+    <section
+      id="about"
+      className="py-20 lg:py-24 bg-[#F8FAFC] border-t border-slate-200/70"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-20">
         {/* Block 1: Tentang Perusahaan, Visi & Misi */}
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-12 items-stretch">
@@ -19,18 +30,16 @@ export const AboutSection: React.FC = () => {
               <div className="w-full h-full rounded-2xl overflow-hidden border border-slate-200 shadow-sm bg-[#EBF3FA]">
                 <ResilientImage
                   src={LOCAL_ASSETS.aboutHospital}
-                  alt="Fasilitas rumah sakit mitra modern PT Foremed Indo Industri"
+                  alt={t.facilityAlt}
                   className="w-full h-full object-cover"
-                  fallbackLabel="Mitra Fasilitas Kesehatan Nasional"
+                  fallbackLabel={t.facilityFallback}
                 />
               </div>
 
               <div className="sm:absolute sm:bottom-5 sm:left-5 sm:right-5 mt-4 sm:mt-0 rounded-2xl bg-[#0B2C5F] text-white p-5 shadow-lg">
-                <p className="text-xs font-medium text-blue-200">
-                  Komitmen Kesehatan Nasional
-                </p>
+                <p className="text-xs font-medium text-blue-200">{t.badgeTop}</p>
                 <p className="font-display text-base sm:text-lg font-bold mt-1 leading-snug">
-                  Didirikan 2025 — Mitra Strategis Kesehatan Nasional
+                  {t.badgeMain}
                 </p>
               </div>
             </div>
@@ -39,45 +48,40 @@ export const AboutSection: React.FC = () => {
           {/* Right Column: Narrative + Visi & Misi */}
           <div className="lg:col-span-7 flex flex-col justify-center">
             <p className="text-xs sm:text-sm font-semibold tracking-wider text-[#1D63B8] mb-3">
-              TENTANG PERUSAHAAN
+              {t.eyebrow}
             </p>
             <h2 className="font-display text-3xl sm:text-4xl font-bold tracking-tight text-[#0F172A] text-balance">
-              Profesionalisme &amp; Inovasi dalam Kemitraan Kesehatan Indonesia
+              {t.title}
             </h2>
 
             <p className="mt-5 text-base text-[#475569] leading-relaxed">
-              <span className="font-semibold text-[#0B2C5F]">
-                PT Foremed Indo Industri
-              </span>{' '}
-              didirikan pada tahun 2025 sebagai perusahaan nasional yang bergerak di
-              bidang alat kesehatan, dengan fokus utama pada{' '}
+              <span className="font-semibold text-[#0B2C5F]">{t.p1Before}</span>{' '}
+              {t.p1Middle}{' '}
               <span className="font-semibold text-[#0F172A]">
-                Kerja Sama Operasional (KSO) mesin haemodialisa
+                {t.p1Highlight}
               </span>{' '}
-              serta penyediaan dan pengelolaan teknologi medis lainnya termasuk radiologi
-              di seluruh Indonesia.
+              {t.p1After}
             </p>
 
             <p className="mt-3 text-base text-[#475569] leading-relaxed">
-              Kami menjunjung tinggi kolaborasi yang sehat, saling melengkapi, serta
-              menghadirkan model{' '}
+              {t.p2Before}{' '}
               <span className="font-semibold text-[#0B2C5F]">
-                Cost-Effective Solutions
+                {t.p2Highlight}
               </span>{' '}
-              yang adaptif agar rumah sakit dapat meningkatkan mutu layanan klinis tanpa
-              beban operasional berlebih.
+              {t.p2After}
             </p>
 
-            {/* Visi & Misi Cards (Hairline Bordered, No Thick Left Stripes) */}
+            {/* Visi & Misi Cards */}
             <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-5">
               <div className="bg-white rounded-2xl border border-slate-200 p-6">
                 <div className="w-10 h-10 rounded-xl bg-[#EBF3FA] text-[#1D63B8] flex items-center justify-center mb-4">
                   <Target className="w-5 h-5" />
                 </div>
-                <h3 className="font-display text-lg font-bold text-[#0B2C5F]">Visi</h3>
+                <h3 className="font-display text-lg font-bold text-[#0B2C5F]">
+                  {t.visionTitle}
+                </h3>
                 <p className="mt-2 text-sm text-[#475569] leading-relaxed">
-                  Menyediakan layanan kesehatan terbaik bagi masyarakat Indonesia melalui
-                  penyediaan teknologi medis yang berkualitas tinggi dan konsisten.
+                  {t.visionText}
                 </p>
               </div>
 
@@ -85,11 +89,11 @@ export const AboutSection: React.FC = () => {
                 <div className="w-10 h-10 rounded-xl bg-[#EBF3FA] text-[#1D63B8] flex items-center justify-center mb-4">
                   <Compass className="w-5 h-5" />
                 </div>
-                <h3 className="font-display text-lg font-bold text-[#0B2C5F]">Misi</h3>
+                <h3 className="font-display text-lg font-bold text-[#0B2C5F]">
+                  {t.missionTitle}
+                </h3>
                 <p className="mt-2 text-sm text-[#475569] leading-relaxed">
-                  Memberikan solusi layanan medis yang efisien dan berkelanjutan bagi
-                  pasien di seluruh Indonesia, serta mendukung rumah sakit dalam
-                  meningkatkan kualitas pelayanan kesehatan nasional.
+                  {t.missionText}
                 </p>
               </div>
             </div>
@@ -100,14 +104,13 @@ export const AboutSection: React.FC = () => {
         <div>
           <div className="max-w-2xl">
             <p className="text-xs sm:text-sm font-semibold tracking-wider text-[#1D63B8] mb-3">
-              STRUKTUR MANAJEMEN
+              {t.mgmtEyebrow}
             </p>
             <h3 className="font-display text-2xl sm:text-3xl font-bold tracking-tight text-[#0F172A] text-balance">
-              Dipimpin oleh Tim Eksekutif Berpengalaman Global
+              {t.mgmtTitle}
             </h3>
             <p className="mt-3 text-base text-[#475569] leading-relaxed">
-              Kombinasi keahlian manajemen alat kesehatan internasional, operasional KSO
-              haemodialisa, tata kelola keuangan, dan inovasi paten teknologi medis.
+              {t.mgmtSubtitle}
             </p>
           </div>
 
@@ -120,7 +123,7 @@ export const AboutSection: React.FC = () => {
                 <div className="aspect-square w-full bg-[#EBF3FA] overflow-hidden">
                   <ResilientImage
                     src={director.imageUrl}
-                    alt={`${director.name} — ${director.role}`}
+                    alt={`${director.name} — ${director.role[language]}`}
                     className="w-full h-full object-cover object-top"
                     fallbackLabel={`${director.name} (${director.initials})`}
                   />
@@ -130,10 +133,10 @@ export const AboutSection: React.FC = () => {
                     {director.name}
                   </h4>
                   <p className="text-xs sm:text-sm font-semibold text-[#1D63B8] mt-0.5">
-                    {director.role}
+                    {director.role[language]}
                   </p>
                   <p className="mt-3 text-sm text-[#475569] leading-relaxed">
-                    {director.bio}
+                    {director.bio[language]}
                   </p>
                 </div>
               </article>
@@ -150,17 +153,14 @@ export const AboutSection: React.FC = () => {
               </div>
               <div>
                 <p className="text-xs font-semibold tracking-wider text-[#1D63B8]">
-                  KEPATUHAN &amp; TATA KELOLA
+                  {t.legalEyebrow}
                 </p>
                 <h3 className="font-display text-xl sm:text-2xl font-bold text-[#0F172A]">
-                  Legalitas Resmi Perusahaan
+                  {t.legalTitle}
                 </h3>
               </div>
             </div>
-            <p className="text-sm text-[#475569] max-w-md">
-              Menjamin kepastian hukum dan kepatuhan regulasi dalam setiap kerja sama
-              pengadaan dan KSO rumah sakit di Indonesia.
-            </p>
+            <p className="text-sm text-[#475569] max-w-md">{t.legalSubtitle}</p>
           </div>
 
           <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -174,7 +174,7 @@ export const AboutSection: React.FC = () => {
                   <div>
                     <div className="flex items-center justify-between gap-2 mb-3">
                       <span className="text-xs font-medium text-[#475569]">
-                        {item.code}
+                        {item.code[language]}
                       </span>
                       <span
                         className={`inline-flex items-center gap-1 text-xs font-semibold ${
@@ -186,15 +186,15 @@ export const AboutSection: React.FC = () => {
                         ) : (
                           <Clock className="w-4 h-4 shrink-0" />
                         )}
-                        <span>{item.status}</span>
+                        <span>{item.statusLabel[language]}</span>
                       </span>
                     </div>
                     <h4 className="font-display text-base font-bold text-[#0F172A]">
-                      {item.document}
+                      {item.document[language]}
                     </h4>
                   </div>
                   <p className="mt-2 text-xs text-[#475569] leading-relaxed">
-                    {item.detail}
+                    {item.detail[language]}
                   </p>
                 </div>
               );

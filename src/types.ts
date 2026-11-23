@@ -1,3 +1,5 @@
+export type Language = 'id' | 'en';
+
 export type NavSectionId = 'home' | 'services' | 'portofolio' | 'about' | 'contact';
 
 export type ConsultationCategory =
@@ -20,39 +22,45 @@ export type PortfolioMediaType = 'IMAGE' | 'VIDEO';
 export interface PortfolioItem {
   id: string;
   title: string;
+  titleEn?: string;
   category: PortfolioProjectCategory;
   mediaType: PortfolioMediaType;
   thumbnailUrl: string;
   mediaUrl: string;
   location: string;
+  locationEn?: string;
   year: string;
   description: string;
+  descriptionEn?: string;
   specs: string[];
+  specsEn?: string[];
   videoHighlights?: string[];
+  videoHighlightsEn?: string[];
   isCustom?: boolean;
 }
 
 export interface ServiceItem {
   number: string;
-  title: string;
-  description: string;
-  highlights: string[];
+  title: Record<Language, string>;
+  description: Record<Language, string>;
+  highlights: Record<Language, string[]>;
   iconName: 'Activity' | 'Stethoscope' | 'Wrench' | 'GraduationCap';
 }
 
 export interface DirectorProfile {
   id: string;
   name: string;
-  role: string;
-  bio: string;
+  role: Record<Language, string>;
+  bio: Record<Language, string>;
   imageUrl: string;
   initials: string;
 }
 
 export interface LegalityItem {
   id: string;
-  document: string;
-  code: string;
+  document: Record<Language, string>;
+  code: Record<Language, string>;
   status: 'Terdaftar' | 'Dalam Proses';
-  detail: string;
+  statusLabel: Record<Language, string>;
+  detail: Record<Language, string>;
 }
