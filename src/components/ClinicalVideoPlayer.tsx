@@ -62,7 +62,9 @@ export const ClinicalVideoPlayer: React.FC<ClinicalVideoPlayerProps> = ({
           poster={thumbnailUrl}
           controls
           autoPlay
+          muted
           playsInline
+          preload="metadata"
           className="w-full h-full object-contain"
         >
           {t.unsupported}

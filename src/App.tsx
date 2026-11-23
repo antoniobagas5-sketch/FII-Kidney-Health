@@ -47,7 +47,19 @@ function loadInitialPortfolio(): PortfolioItem[] {
       );
       return parsed.map((item) => {
         const seed = seedById.get(item.id);
-        return seed ? { ...seed, ...item, titleEn: seed.titleEn, locationEn: seed.locationEn, descriptionEn: seed.descriptionEn, specsEn: seed.specsEn, videoHighlightsEn: seed.videoHighlightsEn } : item;
+        return seed
+          ? {
+              ...seed,
+              ...item,
+              thumbnailUrl: seed.thumbnailUrl,
+              mediaUrl: seed.mediaUrl,
+              titleEn: seed.titleEn,
+              locationEn: seed.locationEn,
+              descriptionEn: seed.descriptionEn,
+              specsEn: seed.specsEn,
+              videoHighlightsEn: seed.videoHighlightsEn,
+            }
+          : item;
       });
     }
     return INITIAL_PORTFOLIO_ITEMS;

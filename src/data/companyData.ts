@@ -39,6 +39,8 @@ export const LOCAL_ASSETS = {
   directorLutfi: '/src/assets/images/director_lutfi_1795435009485.jpg',
   directorWilliam: '/src/assets/images/director_william_1795435028542.jpg',
   directorAndy: '/src/assets/images/director_andy_1795435008295.jpg',
+  commissioningVideo: '/assets/aistudio/gemini_generated_video_04496187_8cbb54f7.mp4',
+  trainingVideo: '/assets/aistudio/gemini_generated_video_7f0c922a_0bc825f3.mp4',
 };
 
 export const CONSULTATION_CATEGORIES: ConsultationCategory[] = [
@@ -174,7 +176,7 @@ export const INITIAL_PORTFOLIO_ITEMS: PortfolioItem[] = [
     category: 'KSO Haemodialisa',
     mediaType: 'VIDEO',
     thumbnailUrl: LOCAL_ASSETS.heroDialysis,
-    mediaUrl: LOCAL_ASSETS.heroDialysis,
+    mediaUrl: LOCAL_ASSETS.commissioningVideo,
     location: 'RSUD Sentra Medika — Jawa Barat',
     locationEn: 'RSUD Sentra Medika — West Java',
     year: '2026',
@@ -220,7 +222,7 @@ export const INITIAL_PORTFOLIO_ITEMS: PortfolioItem[] = [
     category: 'Pelatihan & Maintenance',
     mediaType: 'VIDEO',
     thumbnailUrl: LOCAL_ASSETS.portfolioTraining,
-    mediaUrl: LOCAL_ASSETS.portfolioTraining,
+    mediaUrl: LOCAL_ASSETS.trainingVideo,
     location: 'RSU Bhakti Mulia — Tangerang',
     locationEn: 'RSU Bhakti Mulia — Tangerang',
     year: '2026',
