@@ -1,0 +1,6 @@
+{
+  "name": "PT Foremed Indo Industri — FII Kidney Health",
+  "description": "Mitra Strategis Teknologi Medis & Kerja Sama Operasional (KSO) Haemodialisa Rumah Sakit di Indonesia.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
